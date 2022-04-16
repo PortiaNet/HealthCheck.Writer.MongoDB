@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using PortiaNet.HealthCheck.Reporter;
+using System.Diagnostics;
 
 namespace PortiaNet.HealthCheck.Writer.MongoDB
 {
@@ -17,8 +18,14 @@ namespace PortiaNet.HealthCheck.Writer.MongoDB
                 var mongoDatabase = mongoClient.GetDatabase(config.DatabaseName);
                 _requestsCollection = mongoDatabase.GetCollection<RequestDetail>(config.CollectionName);
             }
-            catch
+            catch(Exception ex)
             {
+                Debugger.Log(0, "HTTP Writer", Environment.NewLine);
+                Debugger.Log(0, "HTTP Writer", $"Configuration Error :: {ex.Message}");
+                Debugger.Log(0, "HTTP Writer", Environment.NewLine);
+                Debugger.Log(0, "HTTP Writer", ex.StackTrace);
+                Debugger.Log(0, "HTTP Writer", Environment.NewLine);
+
                 if (!config.MuteOnError)
                     throw;
             }
@@ -34,9 +41,15 @@ namespace PortiaNet.HealthCheck.Writer.MongoDB
                 requestDetail.NodeName = _config.NodeName;
                 return _requestsCollection.InsertOneAsync(requestDetail);
             }
-            catch
+            catch(Exception ex)
             {
-                if(!_config.MuteOnError)
+                Debugger.Log(0, "HTTP Writer", Environment.NewLine);
+                Debugger.Log(0, "HTTP Writer", $"Error :: {ex.Message}");
+                Debugger.Log(0, "HTTP Writer", Environment.NewLine);
+                Debugger.Log(0, "HTTP Writer", ex.StackTrace);
+                Debugger.Log(0, "HTTP Writer", Environment.NewLine);
+
+                if (!_config.MuteOnError)
                     throw;
                 else
                     return Task.CompletedTask;
